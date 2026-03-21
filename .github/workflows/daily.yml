@@ -7,9 +7,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # ジョブ全体にNode.js 24強制フラグを適用
     env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # ジョブ全体
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
@@ -22,11 +21,12 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # 実行ステップ直下
         run: python main.py
       - name: Commit and Push
         run: |
           git config user.name "Auto-Agent"
           git config user.email "auto@example.com"
           git add .
-          git commit -m "Final Fix: Correct Sitemap Hierarchy and Node24 compliance" || exit 0
+          git commit -m "Ultimate: Strict XML with lastmod and Node24 fix" || exit 0
           git push
