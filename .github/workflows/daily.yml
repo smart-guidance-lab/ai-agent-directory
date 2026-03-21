@@ -7,7 +7,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # 環境変数をジョブレベルに配置し、警告を物理的に封じる
+    # ジョブ全体にNode.js 24強制フラグを適用
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
@@ -28,5 +28,5 @@ jobs:
           git config user.name "Auto-Agent"
           git config user.email "auto@example.com"
           git add .
-          git commit -m "Final Compliance: Node24 and Correct Sitemap Structure" || exit 0
+          git commit -m "Final Fix: Node24 and Google-Strict XML Structure" || exit 0
           git push
