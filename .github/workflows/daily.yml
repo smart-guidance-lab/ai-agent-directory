@@ -8,7 +8,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      # Node.js 20の警告を消し、Node.js 24での動作を確定させる
+      # Node.js 20の非推奨警告を消し、Node.js 24で動作させる
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - uses: actions/checkout@v4
@@ -28,5 +28,5 @@ jobs:
           git config user.name "Auto-Agent"
           git config user.email "auto@example.com"
           git add .
-          git commit -m "Final Fix: Node24 and Strict XML Structure" || exit 0
+          git commit -m "Compliance: Node24 and Strict XML Sitemap" || exit 0
           git push
