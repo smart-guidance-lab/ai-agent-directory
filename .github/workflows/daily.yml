@@ -28,5 +28,5 @@ jobs:
           git config user.name "Auto-Agent"
           git config user.email "auto@example.com"
           git add .
-          git commit -m "Final Fix: Node24 and Google-Strict XML Structure" || exit 0
+          git commit -m "Final Fix: Correct Sitemap Hierarchy and Node24 compliance" || exit 0
           git push
