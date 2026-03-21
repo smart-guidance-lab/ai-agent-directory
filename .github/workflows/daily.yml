@@ -7,12 +7,15 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # Node.js 20の警告を消し、Node.js 24での動作を強制する
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
-      - uses: actions/checkout@v4 # v3からv4に更新
+      - uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v5 # v4からv5に更新
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.11' # より安定したバージョンを指定
+          python-version: '3.11'
       - name: Install dependencies
         run: pip install requests openai
       - name: Run script
@@ -25,5 +28,5 @@ jobs:
           git config user.name "Auto-Agent"
           git config user.email "auto@example.com"
           git add .
-          git commit -m "Fix sitemap and update content" || exit 0
+          git commit -m "Fix: Strict Sitemap XML and Node24 compliance" || exit 0
           git push
