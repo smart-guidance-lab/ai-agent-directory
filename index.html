@@ -3,26 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global AI Agent Directory | Latest Tools & Workflows</title>
+    <title>Global AI Agent Directory | Curated Automation Tools</title>
+    <meta name="description" content="Discover the best AI agents and automation workflows updated daily by autonomous AI analysis.">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css">
+    <style>
+        .agent-card:hover { transform: translateY(-2px); transition: all 0.2s; }
+    </style>
 </head>
-<body class="bg-gray-50 text-gray-900 font-sans">
+<body class="bg-slate-50 text-slate-900 font-sans">
     <header class="bg-white border-b sticky top-0 z-50">
-        <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
-            <h1 class="text-xl font-bold text-indigo-600">AI Agent Index</h1>
-            <a href="YOUR_STRIPE_LINK" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition">Promote Your Tool</a>
+        <div class="max-w-5xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">A</div>
+                <h1 class="text-xl font-bold tracking-tight">AI Agent Index</h1>
+            </div>
+            <nav>
+                <a href="YOUR_STRIPE_LINK" class="bg-indigo-600 text-white px-5 py-2.5 rounded-full text-sm font-bold hover:bg-indigo-700 shadow-md transition-all">Promote Your Tool ($49)</a>
+            </nav>
         </div>
     </header>
-    <main class="max-w-5xl mx-auto px-4 py-12">
-        <section id="content" class="markdown-body bg-white p-8 rounded-xl shadow-sm border">
-            <h2 class="text-3xl font-bold mb-8">Latest AI Agents</h2>
-            <ul id="post-list" class="space-y-4">
-                </ul>
-        </section>
+
+    <main class="max-w-5xl mx-auto px-6 py-12">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-extrabold mb-4 text-slate-800">The Directory of Autonomous Agents</h2>
+            <p class="text-slate-500 text-lg">Daily updated reports on high-potential AI projects from GitHub.</p>
+        </div>
+
+        <div id="post-list" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="animate-pulse bg-white p-6 rounded-xl border">Loading latest agents...</div>
+        </div>
     </main>
-    <footer class="text-center py-10 text-gray-500 text-sm">
-        © 2026 AI Agent Directory. Powered by Automated AI Analysis.
+
+    <footer class="border-t bg-white mt-20">
+        <div class="max-w-5xl mx-auto px-6 py-10 text-center text-slate-400 text-sm">
+            <p>© 2026 AI Agent Directory. All reports are AI-generated for educational purposes.</p>
+            <div class="mt-4 flex justify-center gap-6">
+                <a href="/sitemap.xml" class="hover:text-indigo-600">Sitemap</a>
+                <a href="YOUR_STRIPE_LINK" class="hover:text-indigo-600">Contact / Advertise</a>
+            </div>
+        </div>
     </footer>
+
+    <script>
+        async function loadAgents() {
+            try {
+                const response = await fetch('./data.json');
+                const agents = await response.json();
+                const container = document.getElementById('post-list');
+                container.innerHTML = '';
+
+                agents.forEach(name => {
+                    const card = document.createElement('div');
+                    card.className = 'agent-card bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md cursor-pointer';
+                    card.onclick = () => window.location.href = `./posts/${name}.md`;
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="text-lg font-bold text-slate-800">${name}</h3>
+                            <span class="text-xs font-semibold bg-green-100 text-green-700 px-2 py-1 rounded">New</span>
+                        </div>
+                        <p class="text-slate-500 text-sm mb-4">Latest analysis for ${name}. Click to read the full report on value proposition and setup.</p>
+                        <div class="text-indigo-600 text-sm font-bold flex items-center gap-1">
+                            Read Full Report 
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="9 5l7 7-7 7"></path></svg>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (e) {
+                console.error("Failed to load data.json", e);
+            }
+        }
+        loadAgents();
+    </script>
 </body>
 </html>
