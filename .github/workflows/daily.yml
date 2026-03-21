@@ -8,7 +8,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # ジョブ全体
+      # Node.js 20の警告を消し、Node.js 24での動作を確定させる
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
@@ -21,12 +22,11 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # 実行ステップ直下
         run: python main.py
       - name: Commit and Push
         run: |
           git config user.name "Auto-Agent"
           git config user.email "auto@example.com"
           git add .
-          git commit -m "Ultimate: Strict XML with lastmod and Node24 fix" || exit 0
+          git commit -m "Ultimate Fix: Sitemap rename and SEO logic update" || exit 0
           git push
