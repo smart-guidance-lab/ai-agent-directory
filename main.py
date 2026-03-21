@@ -1,36 +1,27 @@
 import os
 import requests
 from openai import OpenAI
-from datetime import datetime
+import json
 
-# --- 設定（ここを自分のStripeリンクに書き換えてください） ---
-STRIPE_LINK = "https://buy.stripe.com/aFafZgepV8NW7Cwc788so07" 
-# --------------------------------------------------------
+# --- 設定 ---
+STRIPE_LINK = "https://buy.stripe.com/aFafZgepV8NW7Cwc788so07" # 自分のリンクに！
+# ------------
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 def get_ai_projects():
     # トレンドのAIエージェントを取得
     url = "https://api.github.com/search/repositories?q=topic:ai-agent&sort=stars&order=desc"
-    res = requests.get(url).json()
-    return res.get('items', [])[:5] # 1日5件に拡大
+    headers = {"Authorization": f"token {os.getenv('GITHUB_TOKEN')}"}
+    res = requests.get(url, headers=headers).json()
+    return res.get('items', [])[:5]
 
 def generate_content(repo):
-    # SEOと読者利益を最大化するプロンプト
     prompt = f"""
-    Analyze this GitHub project and create a professional review in English for a business audience.
-    Name: {repo['name']}
-    URL: {repo['html_url']}
-    Description: {repo['description']}
-    
-    Structure:
-    1. Catchy Title (H1)
-    2. Executive Summary (Why this matters?)
-    3. Key Features (Bullet points)
-    4. Target Audience
-    5. How to Get Started (Simple steps)
-    
-    Requirement: Use Markdown, SEO friendly keywords, and be concise.
+    Create a professional, SEO-optimized review for this AI project: {repo['name']}. 
+    Description: {repo['description']}. URL: {repo['html_url']}.
+    Output in Markdown with clear sections: # Title, ## Overview, ## Use Cases, ## Key Features.
+    Make it sound like a tech expert's analysis.
     """
     response = client.chat.completions.create(
         model="gpt-4o-mini",
@@ -38,32 +29,41 @@ def generate_content(repo):
     )
     return response.choices[0].message.content
 
-def update_sitemap(filenames):
-    # Google Search Console用の簡易インデックスページ(README.md)を作成
-    with open("README.md", "w", encoding="utf-8") as f:
-        f.write("# Global AI Agent Directory\n\n")
-        f.write("Daily updated directory of the most powerful AI Agents on GitHub.\n\n")
-        f.write("## Newest Agents\n")
-        for name in filenames:
-            f.write(f"- [{name}](./posts/{name}.md)\n")
-        f.write(f"\n\n---\n[🚀 Want to feature your tool here? Click here to Promote for $49]({STRIPE_LINK})")
+def update_directory_data(posts):
+    # index.htmlが読み込むためのデータファイルをJSONで作成
+    with open("data.json", "w", encoding="utf-8") as f:
+        json.dump(posts, f, ensure_ascii=False, indent=4)
 
-# メイン実行部
+def generate_sitemap(posts):
+    # Googlebot用のサイトマップをXML形式で自動生成
+    base_url = "https://your-vercel-domain.vercel.app" # 自分のVercel URLに！
+    sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    for p in posts:
+        sitemap += f"  <url><loc>{base_url}/posts/{p}.md</loc></url>\n"
+    sitemap += "</urlset>"
+    with open("sitemap.xml", "w") as f:
+        f.write(sitemap)
+
+# メイン実行
 projects = get_ai_projects()
-processed_names = []
-
+post_list = []
 os.makedirs("posts", exist_ok=True)
 
 for p in projects:
     name = p['name']
     content = generate_content(p)
-    
-    # 記事の下にStripeリンクを自動挿入
-    footer = f"\n\n---\n### 📢 Support & Promotion\n- [Promote your AI tool on this page]({STRIPE_LINK})\n- [Original Source]({p['html_url']})"
+    footer = f"\n\n---\n[🚀 Promote your AI tool here]({STRIPE_LINK}) | [Source Code]({p['html_url']})"
     
     with open(f"posts/{name}.md", "w", encoding="utf-8") as f:
         f.write(content + footer)
-    processed_names.append(name)
+    post_list.append(name)
 
-# 全記事のリストをトップページに反映（簡易SEO対策）
-update_sitemap(os.listdir("posts"))
+update_directory_data(post_list)
+generate_sitemap(post_list)
+
+# READMEも更新（GitHubからのSEO流入用）
+with open("README.md", "w", encoding="utf-8") as f:
+    f.write(f"# Global AI Agent Directory\n\nLatest tools updated daily.\n\n")
+    for name in post_list:
+        f.write(f"- [{name}](./posts/{name}.md)\n")
+    f.write(f"\n\n---\n[📢 Featured Listing]({STRIPE_LINK})")
