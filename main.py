@@ -44,23 +44,22 @@ with open("data.json", "w", encoding="utf-8") as f:
     json.dump(post_list, f, ensure_ascii=False, indent=4)
 
 # 3. サイトマップ生成（Google Search Console 究極準拠構造）
-# <urlset> の中に <url>、その中に <loc> を配置
-sitemap_xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
-sitemap_xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+# <urlset> の直下に <url>、その中に <loc> を配置
+sitemap_lines = [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    '  <url>',
+    f'    <loc>{BASE_URL}/</loc>',
+    '  </url>'
+]
 
-# トップページ
-sitemap_xml += '  <url>\n'
-sitemap_xml += f'    <loc>{BASE_URL}/</loc>\n'
-sitemap_xml += '  </url>\n'
-
-# 各記事ページ
 for name in post_list:
     page_url = f"{BASE_URL}/posts/{name}.md"
-    sitemap_xml += '  <url>\n'
-    sitemap_xml += f'    <loc>{page_url}</loc>\n'
-    sitemap_xml += '  </url>\n'
+    sitemap_lines.append('  <url>')
+    sitemap_lines.append(f'    <loc>{page_url}</loc>')
+    sitemap_lines.append('  </url>')
 
-sitemap_xml += '</urlset>'
+sitemap_lines.append('</urlset>')
 
 with open("sitemap.xml", "w", encoding="utf-8") as f:
-    f.write(sitemap_xml)
+    f.write("\n".join(sitemap_lines))
