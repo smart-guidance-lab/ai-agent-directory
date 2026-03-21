@@ -43,8 +43,8 @@ for p in projects:
 with open("data.json", "w", encoding="utf-8") as f:
     json.dump(post_list, f, ensure_ascii=False, indent=4)
 
-# 3. サイトマップ生成（Google Search Console 完全準拠構造）
-# 親タグ urlset の中に url タグがあり、その中に loc タグがある構造を徹底
+# 3. サイトマップ生成（Google Search Console 究極準拠構造）
+# <urlset> の中に <url>、その中に <loc> を配置
 sitemap_xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
 sitemap_xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
 
