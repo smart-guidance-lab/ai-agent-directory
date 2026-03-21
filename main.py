@@ -1,30 +1,69 @@
 import os
 import requests
 from openai import OpenAI
+from datetime import datetime
 
-# 1. 初期設定
+# --- 設定（ここを自分のStripeリンクに書き換えてください） ---
+STRIPE_LINK = "https://buy.stripe.com/aFafZgepV8NW7Cwc788so07" 
+# --------------------------------------------------------
+
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-GITHUB_TOKEN = os.getenv("GITHUB_TOKEN") # 自動付与される
 
 def get_ai_projects():
-    # GitHubから「AI Agent」関連のトレンドリポジトリを検索
+    # トレンドのAIエージェントを取得
     url = "https://api.github.com/search/repositories?q=topic:ai-agent&sort=stars&order=desc"
     res = requests.get(url).json()
-    return res.get('items', [])[:3] # 1日3件に絞りコスト節約
+    return res.get('items', [])[:5] # 1日5件に拡大
 
-def summarize_project(repo):
-    prompt = f"Summarize this GitHub project for a business audience in English. Name: {repo['name']}, Description: {repo['description']}. Focus on: 1. Value Proposition, 2. Target User, 3. Ease of Setup. Format: Markdown."
+def generate_content(repo):
+    # SEOと読者利益を最大化するプロンプト
+    prompt = f"""
+    Analyze this GitHub project and create a professional review in English for a business audience.
+    Name: {repo['name']}
+    URL: {repo['html_url']}
+    Description: {repo['description']}
+    
+    Structure:
+    1. Catchy Title (H1)
+    2. Executive Summary (Why this matters?)
+    3. Key Features (Bullet points)
+    4. Target Audience
+    5. How to Get Started (Simple steps)
+    
+    Requirement: Use Markdown, SEO friendly keywords, and be concise.
+    """
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[{"role": "user", "content": prompt}]
     )
     return response.choices[0].message.content
 
-# メイン処理
+def update_sitemap(filenames):
+    # Google Search Console用の簡易インデックスページ(README.md)を作成
+    with open("README.md", "w", encoding="utf-8") as f:
+        f.write("# Global AI Agent Directory\n\n")
+        f.write("Daily updated directory of the most powerful AI Agents on GitHub.\n\n")
+        f.write("## Newest Agents\n")
+        for name in filenames:
+            f.write(f"- [{name}](./posts/{name}.md)\n")
+        f.write(f"\n\n---\n[🚀 Want to feature your tool here? Click here to Promote for $49]({STRIPE_LINK})")
+
+# メイン実行部
 projects = get_ai_projects()
+processed_names = []
+
+os.makedirs("posts", exist_ok=True)
+
 for p in projects:
-    summary = summarize_project(p)
-    filename = f"posts/{p['name']}.md"
-    os.makedirs("posts", exist_ok=True)
-    with open(filename, "w", encoding="utf-8") as f:
-        f.write(f"# {p['name']}\n\nSource: {p['html_url']}\n\n{summary}")
+    name = p['name']
+    content = generate_content(p)
+    
+    # 記事の下にStripeリンクを自動挿入
+    footer = f"\n\n---\n### 📢 Support & Promotion\n- [Promote your AI tool on this page]({STRIPE_LINK})\n- [Original Source]({p['html_url']})"
+    
+    with open(f"posts/{name}.md", "w", encoding="utf-8") as f:
+        f.write(content + footer)
+    processed_names.append(name)
+
+# 全記事のリストをトップページに反映（簡易SEO対策）
+update_sitemap(os.listdir("posts"))
