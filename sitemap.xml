@@ -1,9 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://ai-agent-directory-woad.vercel.app//</loc></url>
-  <url><loc>https://ai-agent-directory-woad.vercel.app//posts/chatgpt-on-wechat.md</loc></url>
-  <url><loc>https://ai-agent-directory-woad.vercel.app//posts/cherry-studio.md</loc></url>
-  <url><loc>https://ai-agent-directory-woad.vercel.app//posts/learn-claude-code.md</loc></url>
-  <url><loc>https://ai-agent-directory-woad.vercel.app//posts/CopilotKit.md</loc></url>
-  <url><loc>https://ai-agent-directory-woad.vercel.app//posts/cli.md</loc></url>
+  <url>
+    <loc>https://ai-agent-directory-woad.vercel.app/</loc>
+  </url>
+  <url>
+    <loc>https://ai-agent-directory-woad.vercel.app/posts/chatgpt-on-wechat.md</loc>
+  </url>
+  <url>
+    <loc>https://ai-agent-directory-woad.vercel.app/posts/cherry-studio.md</loc>
+  </url>
+  <url>
+    <loc>https://ai-agent-directory-woad.vercel.app/posts/learn-claude-code.md</loc>
+  </url>
+  <url>
+    <loc>https://ai-agent-directory-woad.vercel.app/posts/CopilotKit.md</loc>
+  </url>
+  <url>
+    <loc>https://ai-agent-directory-woad.vercel.app/posts/cli.md</loc>
+  </url>
 </urlset>
