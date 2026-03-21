@@ -3,47 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global AI Agent Directory | Curated Automation Tools</title>
-    <meta name="description" content="Discover the best AI agents and automation workflows updated daily by autonomous AI analysis.">
+    <title>Global AI Agent Directory | Professional Automation Analysis</title>
+    <meta name="google-site-verification" content="<meta name="google-site-verification" content="n2V60v_i47eXrWEGYi1WRTrD9-tidkXkJhrbjDgTkXU" />" />
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css">
     <style>
-        .agent-card:hover { transform: translateY(-2px); transition: all 0.2s; }
+        .agent-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+        .gradient-text { background: linear-gradient(90deg, #4F46E5, #9333EA); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans">
-    <header class="bg-white border-b sticky top-0 z-50">
-        <div class="max-w-5xl mx-auto px-6 py-4 flex justify-between items-center">
+    <header class="bg-white/80 backdrop-blur-md border-b sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
             <div class="flex items-center gap-2">
-                <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">A</div>
-                <h1 class="text-xl font-bold tracking-tight">AI Agent Index</h1>
+                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold shadow-lg shadow-indigo-200">A</div>
+                <h1 class="text-xl font-black tracking-tighter">AGENT<span class="text-indigo-600">INDEX</span></h1>
             </div>
-            <nav>
-                <a href="YOUR_STRIPE_LINK" class="bg-indigo-600 text-white px-5 py-2.5 rounded-full text-sm font-bold hover:bg-indigo-700 shadow-md transition-all">Promote Your Tool ($49)</a>
-            </nav>
+            <a href="YOUR_STRIPE_LINK" class="bg-indigo-600 text-white px-6 py-2.5 rounded-full text-sm font-bold hover:scale-105 transition-all active:scale-95 shadow-lg shadow-indigo-100">Featured Listing</a>
         </div>
     </header>
 
-    <main class="max-w-5xl mx-auto px-6 py-12">
-        <div class="text-center mb-16">
-            <h2 class="text-4xl font-extrabold mb-4 text-slate-800">The Directory of Autonomous Agents</h2>
-            <p class="text-slate-500 text-lg">Daily updated reports on high-potential AI projects from GitHub.</p>
+    <main class="max-w-6xl mx-auto px-6 py-16">
+        <div class="mb-16">
+            <h2 class="text-5xl font-extrabold mb-6 leading-tight">Discover the <span class="gradient-text">Future of Autonomy.</span></h2>
+            <p class="text-slate-500 text-xl max-w-2xl">Autonomous AI analyzes 1,000+ repositories daily to bring you the most impactful agents. Stop searching. Start deploying.</p>
         </div>
 
-        <div id="post-list" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="animate-pulse bg-white p-6 rounded-xl border">Loading latest agents...</div>
+        <div id="post-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="p-10 border-2 border-dashed border-slate-200 rounded-3xl text-slate-400 text-center col-span-full">Initializing AI Scanner...</div>
         </div>
     </main>
-
-    <footer class="border-t bg-white mt-20">
-        <div class="max-w-5xl mx-auto px-6 py-10 text-center text-slate-400 text-sm">
-            <p>© 2026 AI Agent Directory. All reports are AI-generated for educational purposes.</p>
-            <div class="mt-4 flex justify-center gap-6">
-                <a href="/sitemap.xml" class="hover:text-indigo-600">Sitemap</a>
-                <a href="YOUR_STRIPE_LINK" class="hover:text-indigo-600">Contact / Advertise</a>
-            </div>
-        </div>
-    </footer>
 
     <script>
         async function loadAgents() {
@@ -52,30 +40,28 @@
                 const agents = await response.json();
                 const container = document.getElementById('post-list');
                 container.innerHTML = '';
-
-                agents.forEach(name => {
+                agents.reverse().forEach(name => {
                     const card = document.createElement('div');
-                    card.className = 'agent-card bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md cursor-pointer';
+                    card.className = 'agent-card bg-white p-8 rounded-3xl border border-slate-100 shadow-sm transition-all cursor-pointer flex flex-col justify-between';
                     card.onclick = () => window.location.href = `./posts/${name}.md`;
                     card.innerHTML = `
-                        <div class="flex justify-between items-start mb-4">
-                            <h3 class="text-lg font-bold text-slate-800">${name}</h3>
-                            <span class="text-xs font-semibold bg-green-100 text-green-700 px-2 py-1 rounded">New</span>
+                        <div>
+                            <div class="flex justify-between items-center mb-6">
+                                <span class="text-[10px] font-bold uppercase tracking-widest text-indigo-500 bg-indigo-50 px-2 py-1 rounded">Analysis Complete</span>
+                                <span class="text-slate-300 text-xs">2026</span>
+                            </div>
+                            <h3 class="text-2xl font-bold text-slate-800 mb-3">${name}</h3>
+                            <p class="text-slate-500 text-sm leading-relaxed mb-8">Comprehensive architectural review and business ROI analysis for ${name}.</p>
                         </div>
-                        <p class="text-slate-500 text-sm mb-4">Latest analysis for ${name}. Click to read the full report on value proposition and setup.</p>
-                        <div class="text-indigo-600 text-sm font-bold flex items-center gap-1">
-                            Read Full Report 
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="9 5l7 7-7 7"></path></svg>
+                        <div class="flex items-center gap-2 text-indigo-600 font-bold text-sm">
+                            View Report <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 8l4 4m0 0l-4 4m4-4H3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                         </div>
                     `;
                     container.appendChild(card);
                 });
-            } catch (e) {
-                console.error("Failed to load data.json", e);
-            }
+            } catch (e) { console.error(e); }
         }
         loadAgents();
     </script>
 </body>
 </html>
-<meta name="google-site-verification" content="n2V60v_i47eXrWEGYi1WRTrD9-tidkXkJhrbjDgTkXU" />
