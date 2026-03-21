@@ -3,10 +3,10 @@ import requests
 from openai import OpenAI
 import json
 
-# --- Config（書き換えてください） ---
+# --- Config（要書き換え） ---
 STRIPE_LINK = "https://buy.stripe.com/aFafZgepV8NW7Cwc788so07" 
 BASE_URL = "https://ai-agent-directory-woad.vercel.app" # 末尾の / は不要
-# -------------------------------
+# -------------------------
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -17,7 +17,7 @@ def get_ai_projects():
     return res.get('items', [])[:5]
 
 def generate_content(repo):
-    prompt = f"Create a high-value review for: {repo['name']}. Source: {repo['html_url']}. Focus on business automation and ROI. Professional English."
+    prompt = f"Write a professional analysis of the AI project: {repo['name']}. Source: {repo['html_url']}. Focus on ROI and Business Impact. English."
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[{"role": "user", "content": prompt}]
@@ -34,7 +34,7 @@ for p in projects:
     filename = f"posts/{name}.md"
     if not os.path.exists(filename):
         content = generate_content(p)
-        footer = f"\n\n---\n[🚀 Feature your tool here]({STRIPE_LINK}) | [Source Code]({p['html_url']})"
+        footer = f"\n\n---\n[🚀 Promote your tool]({STRIPE_LINK}) | [Source]({p['html_url']})"
         with open(filename, "w", encoding="utf-8") as f:
             f.write(content + footer)
     post_list.append(name)
@@ -43,7 +43,8 @@ for p in projects:
 with open("data.json", "w", encoding="utf-8") as f:
     json.dump(post_list, f, ensure_ascii=False, indent=4)
 
-# 3. サイトマップ修正（Google Search Console 完全準拠構造）
+# 3. サイトマップ生成（Google Search Console 完全準拠構造）
+# 親タグ urlset の中に url タグがあり、その中に loc タグがある構造を徹底
 sitemap_xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
 sitemap_xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
 
@@ -52,7 +53,7 @@ sitemap_xml += '  <url>\n'
 sitemap_xml += f'    <loc>{BASE_URL}/</loc>\n'
 sitemap_xml += '  </url>\n'
 
-# 各記事（階層構造を厳格に）
+# 各記事ページ
 for name in post_list:
     page_url = f"{BASE_URL}/posts/{name}.md"
     sitemap_xml += '  <url>\n'
