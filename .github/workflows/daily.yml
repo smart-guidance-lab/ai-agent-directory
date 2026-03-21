@@ -1,28 +1,29 @@
 name: Daily AI Agent Update
 on:
   schedule:
-    - cron: '0 0 * * *' # 毎日日本時間午前9時に実行
-  workflow_dispatch: # 手動実行も可能
+    - cron: '0 0 * * *'
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4 # v3からv4に更新
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5 # v4からv5に更新
         with:
-          python-version: '3.9'
+          python-version: '3.11' # より安定したバージョンを指定
       - name: Install dependencies
         run: pip install requests openai
       - name: Run script
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python main.py
       - name: Commit and Push
         run: |
           git config user.name "Auto-Agent"
           git config user.email "auto@example.com"
           git add .
-          git commit -m "Add new AI agent reports" || exit 0
+          git commit -m "Fix sitemap and update content" || exit 0
           git push
