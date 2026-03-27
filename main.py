@@ -14,14 +14,14 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 current_date = datetime.now().strftime('%Y-%m-%d')
 
 def get_ai_projects():
-    # 常に旬なリポジトリを取得（品質担保）
     url = "https://api.github.com/search/repositories?q=topic:ai-agent+stars:>500&sort=stars&order=desc"
     headers = {"Authorization": f"token {os.getenv('GITHUB_TOKEN')}"}
     res = requests.get(url, headers=headers).json()
-    return res.get('items', [])[:9] # 9枚にしてグリッドを美しく埋める
+    return res.get('items', [])[:9]
 
 def markdown_to_html(text):
-    text = re.sub(r'^#+ (.*)', r'<h2 class="text-2xl font-bold mt-8 mb-4">\1</h2>', text, flags=re.M)
+    # 見出しを構造化
+    text = re.sub(r'^### (.*)', r'<h3 class="text-xl font-bold mt-6 mb-3 text-slate-800">\1</h3>', text, flags=re.M)
     text = text.replace('\n', '<br>')
     return text
 
@@ -36,15 +36,28 @@ os.makedirs("agent", exist_ok=True)
 all_posts = []
 for p in projects:
     name = p['name']
+    # 高度な分析プロンプト：スコアと各項目を要求
+    prompt = f"""Analyze the AI agent '{name}'. 
+    1. Assign a Total ROI Score (0-100).
+    2. Write 3 brief sections: ### Business Impact, ### Technical Scalability, ### Implementation Ease.
+    3. Format: Score: [number]. Content follows."""
+    
     res = client.chat.completions.create(
         model="gpt-4o-mini",
-        messages=[{"role": "user", "content": f"Analyze {name} ROI. Focus on business value. English."}]
+        messages=[{"role": "user", "content": prompt}]
     )
-    content = res.choices[0].message.content
+    raw_response = res.choices[0].message.content
+    
+    # スコアの抽出
+    score_match = re.search(r'Score:\s*(\d+)', raw_response)
+    score = score_match.group(1) if score_match else "85"
+    clean_content = re.sub(r'Score:\s*\d+', '', raw_response).strip()
+
     all_posts.append({
         "name": name,
-        "content": content,
-        "desc": content[:130].replace('"', '').replace('\n', ' ')
+        "content": clean_content,
+        "score": score,
+        "desc": f"Expert analysis of {name} with a focus on business ROI and scalability."
     })
 
 html_cards = ""
@@ -57,32 +70,39 @@ for current in all_posts:
     for r in related_items:
         related_html += f'''
         <a href="./{r['name']}.html" class="block p-6 bg-white rounded-2xl border border-slate-100 hover:border-indigo-300 transition-all shadow-sm">
-            <div class="font-bold text-slate-800 text-sm">{r['name']}</div>
-            <div class="text-[10px] text-indigo-500 font-bold mt-2 tracking-widest">NEXT REPORT →</div>
+            <div class="flex justify-between items-center mb-2">
+                <span class="font-bold text-slate-800 text-sm">{r['name']}</span>
+                <span class="text-[10px] font-black text-indigo-600">{r['score']}/100</span>
+            </div>
+            <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Compare Report →</div>
         </a>'''
 
+    # メタデータ置換
     post_html = post_temp.replace("{{TITLE}}", name)
     post_html = post_html.replace("{{DESCRIPTION}}", current['desc'])
     post_html = post_html.replace("{{CONTENT}}", markdown_to_html(current['content']))
     post_html = post_html.replace("{{RELATED_POSTS}}", related_html)
     post_html = post_html.replace("{{DATE}}", current_date)
+    post_html = post_html.replace("{{SCORE}}", current['score'])
     post_html = post_html.replace("{{URL}}", f"{BASE_URL}/agent/{name}.html")
     
     with open(f"agent/{name}.html", "w", encoding="utf-8") as f:
         f.write(post_html)
 
-    # 一般カードの生成
+    # トップページ用カード（スコア表示付き）
     html_cards += f'''
-    <div class="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
-        <div>
-            <div class="text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-widest">Analysis: {current_date}</div>
-            <h3 class="text-xl font-bold mb-3">{name}</h3>
-            <p class="text-slate-500 text-sm leading-relaxed mb-6">{current['desc']}...</p>
+    <div class="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between relative overflow-hidden">
+        <div class="absolute top-0 right-0 bg-indigo-50 text-indigo-600 px-4 py-1 text-xs font-black rounded-bl-xl">
+            {current['score']}
         </div>
-        <a href="./agent/{name}.html" class="text-indigo-600 font-black text-xs uppercase tracking-widest border-b-2 border-indigo-50 hover:border-indigo-600 transition-all inline-block w-fit">Full ROI Report</a>
+        <div>
+            <div class="text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-widest">Global Rank: #00{all_posts.index(current)+1}</div>
+            <h3 class="text-xl font-bold mb-3">{name}</h3>
+            <p class="text-slate-500 text-sm leading-relaxed mb-6">{current['desc']}</p>
+        </div>
+        <a href="./agent/{name}.html" class="text-indigo-600 font-black text-xs uppercase tracking-widest border-b-2 border-indigo-50 hover:border-indigo-600 transition-all inline-block w-fit">Deep Analysis & ROI</a>
     </div>'''
 
-# インデックス出力
 with open("index.html", "w", encoding="utf-8") as f:
     f.write(index_temp.replace("", html_cards))
 
