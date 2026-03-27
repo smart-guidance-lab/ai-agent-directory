@@ -28,5 +28,5 @@ jobs:
           git config user.name "Auto-Agent"
           git config user.email "auto@example.com"
           git add .
-          git commit -m "Ultimate Fix: Sitemap rename and SEO logic update" || exit 0
+          git commit -m "Ultimate Fix: Sitemap rename and Node24 compliance" || exit 0
           git push
