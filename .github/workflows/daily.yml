@@ -8,7 +8,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      # Node.js 20の警告を消し、Node.js 24での動作を確定させる
+      # 警告を消し、2026年6月以降も動くように固定
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - uses: actions/checkout@v4
@@ -28,5 +28,5 @@ jobs:
           git config user.name "Auto-Agent"
           git config user.email "auto@example.com"
           git add .
-          git commit -m "Ultimate Fix: Sitemap rename and Node24 compliance" || exit 0
+          git commit -m "Strategic Shift: Focus on Content Authority" || exit 0
           git push
