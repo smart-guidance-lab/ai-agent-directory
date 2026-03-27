@@ -7,11 +7,10 @@ import random
 
 # --- Config ---
 BASE_URL = "https://ai-agent-directory-woad.vercel.app"
-STRIPE_LINK = "https://buy.stripe.com/aFafZgepV8NW7Cwc788so07"
 # --------------
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-current_date = datetime.now().strftime('%a, %d %b %Y %H:%M:%S +0000') # RSS用フォーマット
+current_date = datetime.now().strftime('%a, %d %b %Y %H:%M:%S +0000')
 display_date = datetime.now().strftime('%Y-%m-%d')
 
 def get_ai_projects():
@@ -20,11 +19,7 @@ def get_ai_projects():
     res = requests.get(url, headers=headers).json()
     return res.get('items', [])[:12]
 
-def markdown_to_html(text):
-    text = re.sub(r'^### (.*)', r'<h3 class="text-xl font-bold mt-6 mb-3 text-slate-800">\1</h3>', text, flags=re.M)
-    text = text.replace('\n', '<br>')
-    return text
-
+# 1. 各種テンプレート読み込み
 with open("template.html", "r", encoding="utf-8") as f:
     index_temp = f.read()
 with open("post_template.html", "r", encoding="utf-8") as f:
@@ -33,6 +28,7 @@ with open("post_template.html", "r", encoding="utf-8") as f:
 projects = get_ai_projects()
 os.makedirs("agent", exist_ok=True)
 
+# 統計
 total_stars = sum([p['stargazers_count'] for p in projects])
 total_count = len(projects)
 
@@ -40,81 +36,57 @@ all_posts = []
 rss_items = ""
 
 for p in projects:
-    name = p['name']
-    stars = p['stargazers_count']
-    
-    prompt = f"Critically evaluate {name}. Stars: {stars}. Score 0-100. Write 3-point business ROI impact. English."
+    name, stars = p['name'], p['stargazers_count']
     res = client.chat.completions.create(
         model="gpt-4o-mini",
-        messages=[{"role": "user", "content": prompt}]
+        messages=[{"role": "user", "content": f"Briefly score {name} ROI (0-100) and give 3 points analysis."}]
     )
-    raw_response = res.choices[0].message.content
+    raw = res.choices[0].message.content
+    score = re.search(r'\d+', raw).group(0) if re.search(r'\d+', raw) else "85"
+    summary = raw[:140].replace('\n', ' ')
+
+    all_posts.append({"name": name, "score": score, "stars": f"{stars:,}", "desc": summary})
     
-    score_match = re.search(r'Score:\s*(\d+)', raw_response)
-    score = score_match.group(1) if score_match else "85"
-    clean_content = re.sub(r'Score:\s*\d+', '', raw_response).strip()
-    summary = clean_content[:150].replace('<br>', ' ')
+    # RSS Item
+    rss_items += f"<item><title>[{score}] {name}</title><link>{BASE_URL}/agent/{name}.html</link><description>{summary}</description><pubDate>{current_date}</pubDate></item>"
 
-    all_posts.append({
-        "name": name,
-        "content": clean_content,
-        "score": score,
-        "stars": f"{stars:,}",
-        "url": f"{BASE_URL}/agent/{name}.html"
-    })
-
-    # RSS Item生成
-    rss_items += f"""
-    <item>
-        <title>[ROI {score}] {name}</title>
-        <link>{BASE_URL}/agent/{name}.html</link>
-        <description>{summary}...</description>
-        <pubDate>{current_date}</pubDate>
-        <guid>{BASE_URL}/agent/{name}.html</guid>
-    </item>"""
-
-    # 個別ページ生成 (post_templateを使用)
-    post_html = post_temp.replace("{{TITLE}}", name).replace("{{DESCRIPTION}}", summary)
-    post_html = post_html.replace("{{CONTENT}}", markdown_to_html(clean_content))
-    post_html = post_html.replace("{{SCORE}}", score).replace("{{DATE}}", display_date)
-    # 関連記事等は前回のロジックを継承（ここでは簡略化）
+    # Post HTML
+    post_html = post_temp.replace("{{TITLE}}", name).replace("{{DESCRIPTION}}", summary).replace("{{SCORE}}", score).replace("{{DATE}}", display_date).replace("{{CONTENT}}", raw.replace('\n', '<br>'))
     with open(f"agent/{name}.html", "w", encoding="utf-8") as f:
         f.write(post_html)
 
-# RSSフィード書き出し
-rss_full = f"""<?xml version="1.0" encoding="UTF-8" ?>
-<rss version="2.0">
-<channel>
-  <title>AI Agent Index - Market ROI Intelligence</title>
-  <link>{BASE_URL}</link>
-  <description>Daily updated AI agent ROI analysis and market heat tracking.</description>
-  <lastBuildDate>{current_date}</lastBuildDate>
-  {rss_items}
-</channel>
-</rss>"""
+# 2. PWA: manifest.json
+manifest = f'''{{
+    "name": "AI Agent Index",
+    "short_name": "AgentIndex",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#4f46e5",
+    "icons": [{{ "src": "https://cdn-icons-png.flaticon.com/512/2593/2593635.png", "sizes": "512x512", "type": "image/png" }}]
+}}'''
+with open("manifest.json", "w", encoding="utf-8") as f:
+    f.write(manifest)
 
+# 3. PWA: sw.js (Offline Cache)
+sw = '''self.addEventListener('install', (e) => { e.waitUntil(caches.open('v1').then((cache) => cache.addAll(['/', '/index.html']))); });
+self.addEventListener('fetch', (e) => { e.respondWith(caches.match(e.request).then((res) => res || fetch(e.request))); });'''
+with open("sw.js", "w", encoding="utf-8") as f:
+    f.write(sw)
+
+# 4. RSS: feed.xml
 with open("feed.xml", "w", encoding="utf-8") as f:
-    f.write(rss_full.strip())
+    f.write(f'<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>AI Agent Index</title><link>{BASE_URL}</link>{rss_items}</channel></rss>')
 
-# インデックス生成
+# 5. Index: index.html
 html_cards = ""
-for current in all_posts:
-    html_cards += f'''
-    <div class="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl transition-all flex flex-col justify-between group">
-        <div>
-            <div class="flex justify-between items-start mb-4">
-                <div class="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter">★ {current['stars']}</div>
-                <div class="text-2xl font-black text-indigo-600">{current['score']}</div>
-            </div>
-            <h3 class="text-xl font-bold mb-2">{current['name']}</h3>
-        </div>
-        <a href="./agent/{current['name']}.html" class="bg-slate-900 text-white text-center py-3 rounded-2xl text-xs font-bold hover:bg-indigo-600 transition-colors">Analyze ROI</a>
+for c in all_posts:
+    html_cards += f'''<div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between">
+        <div class="flex justify-between mb-4"><span class="text-[10px] font-black text-indigo-600">★ {c['stars']}</span><span class="font-black text-slate-300">{c['score']}</span></div>
+        <h3 class="font-bold mb-2">{c['name']}</h3>
+        <a href="./agent/{c['name']}.html" class="bg-slate-50 text-slate-900 text-center py-2 rounded-xl text-xs font-bold hover:bg-indigo-600 hover:text-white transition-all">View Report</a>
     </div>'''
 
-final_index = index_temp.replace("", html_cards)
-final_index = final_index.replace("{{TOTAL_COUNT}}", str(total_count))
-final_index = final_index.replace("{{TOTAL_STARS}}", f"{total_stars // 1000}")
-final_index = final_index.replace("{{DATE}}", display_date)
-
+index_html = index_temp.replace("", html_cards).replace("{{TOTAL_COUNT}}", str(total_count)).replace("{{TOTAL_STARS}}", f"{total_stars // 1000}").replace("{{DATE}}", display_date)
 with open("index.html", "w", encoding="utf-8") as f:
-    f.write(final_index)
+    f.write(index_html)
