@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Allow: /sitemap.xml
+Allow: /feed.xml
+Allow: /sitemap_v1.xml
+
+Sitemap: https://ai-agent-directory-woad.vercel.app/sitemap.xml
+Sitemap: https://ai-agent-directory-woad.vercel.app/feed.xml
