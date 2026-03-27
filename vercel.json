@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    {
+      "source": "/sitemap.xml",
+      "destination": "/sitemap.xml"
+    },
+    {
+      "source": "/feed.xml",
+      "destination": "/feed.xml"
+    },
+    {
+      "source": "/agent/:path",
+      "destination": "/posts/:path.md"
+    }
+  ]
+}
