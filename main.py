@@ -5,7 +5,7 @@ import json
 from datetime import datetime
 
 # --- Config（要書き換え） ---
-STRIPE_LINK = "https://buy.stripe.com/aFafZgepV8NW7Cwc788so07" 
+STRIPE_LINK = "https://buy.stripe.com/aFafZgepV8NW7Cwc788so07" # ユーザー提供のリンク
 BASE_URL = "https://ai-agent-directory-woad.vercel.app" 
 # -------------------------
 
@@ -33,7 +33,7 @@ for p in projects:
     filename = f"posts/{name}.md"
     if not os.path.exists(filename):
         content = generate_content(p)
-        footer = f"\n\n---\n[🚀 Feature your tool]({STRIPE_LINK}) | [Source]({p['html_url']})"
+        footer = f"\n\n---\n[🚀 Promote your tool]({STRIPE_LINK}) | [Source]({p['html_url']})"
         with open(filename, "w", encoding="utf-8") as f:
             f.write(content + footer)
     post_list.append(name)
@@ -43,19 +43,29 @@ with open("data.json", "w", encoding="utf-8") as f:
     json.dump(post_list, f, ensure_ascii=False, indent=4)
 
 # 3. サイトマップ生成（Googleのキャッシュを回避するため別名で保存）
-# XMLヘッダーとurlsetタグの間に改行を入れず、パースミスを最小化する
-sitemap_xml = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+sitemap_xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
+sitemap_xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
 
 # トップページ
-sitemap_xml += f'<url><loc>{BASE_URL}/</loc><lastmod>{current_date}</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>'
+sitemap_xml += '  <url>\n'
+sitemap_xml += f'    <loc>{BASE_URL}/</loc>\n'
+sitemap_xml += f'    <lastmod>{current_date}</lastmod>\n'
+sitemap_xml += '    <changefreq>daily</changefreq>\n'
+sitemap_xml += '    <priority>1.0</priority>\n'
+sitemap_xml += '  </url>\n'
 
 # 各記事
 for name in post_list:
     page_url = f"{BASE_URL}/posts/{name}.md"
-    sitemap_xml += f'<url><loc>{page_url}</loc><lastmod>{current_date}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>'
+    sitemap_xml += '  <url>\n'
+    sitemap_xml += f'    <loc>{page_url}</loc>\n'
+    sitemap_xml += f'    <lastmod>{current_date}</lastmod>\n'
+    sitemap_xml += '    <changefreq>weekly</changefreq>\n'
+    sitemap_xml += '    <priority>0.8</priority>\n'
+    sitemap_xml += '  </url>\n'
 
 sitemap_xml += '</urlset>'
 
-# ファイル名をsitemap_v1.xmlに変更（旧ファイルのキャッシュを捨てる）
+# ファイル名をsitemap_v1.xmlに変更（旧キャッシュのバイパス）
 with open("sitemap_v1.xml", "w", encoding="utf-8") as f:
     f.write(sitemap_xml)
