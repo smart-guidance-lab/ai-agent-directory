@@ -3,63 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global AI Agent Directory | Professional Automation Analysis</title>
+    <title>Global AI Agent Directory | Professional Analysis</title>
     <meta name="google-site-verification" content="n2V60v_i47eXrWEGYi1WRTrD9-tidkXkJhrbjDgTkXU" />
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .agent-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
-        .gradient-text { background: linear-gradient(90deg, #4F46E5, #9333EA); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    </style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans">
-    <header class="bg-white/80 backdrop-blur-md border-b sticky top-0 z-50">
+    <header class="bg-white border-b sticky top-0 z-50">
         <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
             <div class="flex items-center gap-2">
-                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold shadow-lg shadow-indigo-200">A</div>
+                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold">A</div>
                 <h1 class="text-xl font-black tracking-tighter">AGENT<span class="text-indigo-600">INDEX</span></h1>
             </div>
-            <a href="https://buy.stripe.com/aFafZgepV8NW7Cwc788so07" class="bg-indigo-600 text-white px-6 py-2.5 rounded-full text-sm font-bold hover:scale-105 transition-all active:scale-95 shadow-lg shadow-indigo-100">Featured Listing</a>
+            <nav id="nav-links" class="hidden"></nav> <a href="https://buy.stripe.com/aFafZgepV8NW7Cwc788so07" class="bg-indigo-600 text-white px-6 py-2 rounded-full text-sm font-bold">Featured Listing</a>
         </div>
     </header>
-
     <main class="max-w-6xl mx-auto px-6 py-16">
-        <div class="mb-16">
-            <h2 class="text-5xl font-extrabold mb-6 leading-tight">Discover the <span class="gradient-text">Future of Autonomy.</span></h2>
-            <p class="text-slate-500 text-xl max-w-2xl">Autonomous AI analyzes 1,000+ repositories daily to bring you the most impactful agents. Stop searching. Start deploying.</p>
-        </div>
-
+        <h2 class="text-4xl font-extrabold mb-12">Latest <span class="text-indigo-600">AI Agents</span></h2>
         <div id="post-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div class="p-10 border-2 border-dashed border-slate-200 rounded-3xl text-slate-400 text-center col-span-full">Initializing AI Scanner...</div>
-        </div>
+            </div>
     </main>
-
     <script>
         async function loadAgents() {
-            try {
-                const response = await fetch('./data.json');
-                const agents = await response.json();
-                const container = document.getElementById('post-list');
-                container.innerHTML = '';
-                agents.reverse().forEach(name => {
-                    const card = document.createElement('div');
-                    card.className = 'agent-card bg-white p-8 rounded-3xl border border-slate-100 shadow-sm transition-all cursor-pointer flex flex-col justify-between';
-                    card.onclick = () => window.location.href = `./posts/${name}.md`;
-                    card.innerHTML = `
-                        <div>
-                            <div class="flex justify-between items-center mb-6">
-                                <span class="text-[10px] font-bold uppercase tracking-widest text-indigo-500 bg-indigo-50 px-2 py-1 rounded">Analysis Complete</span>
-                                <span class="text-slate-300 text-xs">2026</span>
-                            </div>
-                            <h3 class="text-2xl font-bold text-slate-800 mb-3">${name}</h3>
-                            <p class="text-slate-500 text-sm leading-relaxed mb-8">Comprehensive architectural review and business ROI analysis for ${name}.</p>
-                        </div>
-                        <div class="flex items-center gap-2 text-indigo-600 font-bold text-sm">
-                            View Report <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 8l4 4m0 0l-4 4m4-4H3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                        </div>
-                    `;
-                    container.appendChild(card);
-                });
-            } catch (e) { console.error(e); }
+            const res = await fetch('./data.json');
+            const agents = await res.json();
+            const container = document.getElementById('post-list');
+            const nav = document.getElementById('nav-links');
+            container.innerHTML = '';
+            agents.forEach(name => {
+                // ユーザー用カード
+                const card = document.createElement('div');
+                card.className = 'bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all cursor-pointer';
+                card.onclick = () => window.location.href = `./agent/${name}`;
+                card.innerHTML = `<h3 class="text-xl font-bold mb-2">${name}</h3><p class="text-slate-500 text-sm">Deep analysis and business impact report.</p>`;
+                container.appendChild(card);
+                
+                // クローラー用テキストリンク（重要）
+                const link = document.createElement('a');
+                link.href = `./agent/${name}`;
+                link.innerText = name;
+                nav.appendChild(link);
+            });
         }
         loadAgents();
     </script>
